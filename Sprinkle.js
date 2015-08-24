@@ -24,25 +24,18 @@ b.digitalWrite('USR2', 0);
 const minutes = 60000;                  // Minute
 var downCounter = 0;                    // Main Counter of Motor ON
 var intervalObject;                     // Returns a timeoutObject for possible use with clearTimeout()
-var accRain = 0.0;                      // 
-var sunriseHour = 0;                    // 
+var accRain = 0.0;                      // Raining accumulation <= 14
+var sunriseHour = 6;                    // for comparison of sunrise time
 var sunriseMinute = 0;                  // 
-var sunsetHour = 0;                     // 
+var sunsetHour = 18;                    // for comparison of sunset time
 var sunsetMinute = 0;                   // 
-var highTemp = 25;                      // 
+var highTemp = 250;                     // Highest Temperature of the day *10
 // }----------------------------------------------------------------------------
 // Initialization {
 setTimeout(aliveSignal0, 500);          // Initialization for Toggling LED
-setTimeout(crawlKimono, 500);          // Initialization for Kimono network spider
-setTimeout(stateCheckCounter, 1000);    // Initialization for Main State
+setTimeout(crawlKimono, 500);           // Initialization for Kimono network spider
+setTimeout(checkSchedule, 500);         // Initialization for Main State
 // }----------------------------------------------------------------------------
-
-
-
-
-
-
-
 // Initialize the server on port 8168 {
 var server = http.createServer(function (req, res) {
     var file = '/var/lib/cloud9/BeagleBone_Motor'+((req.url=='/')?'/Grundfos.html':req.url); // requesting files
@@ -106,16 +99,18 @@ function crawlKimono() {
         if (rainAverage > accRain) accRain = rainAverage;
         console.log('rainAverage: '+ rainAverage);
     });
-
     request("https://www.kimonolabs.com/api/78dba3cq?apikey=lcE98jpR1ZSfMv1hY8eB9cTgEUAnhoTn",
     function(err, response, body) {     // Highest Temperature
         var hsinchu = JSON.parse(body);
         var str = hsinchu.results.Sun[0].temp;
         for (var i=2; i < str.length; i++) { 
           if (str[i] == "~") {
-              highTemp = parseInt(str.substring(i+2, str.length));
+              highTemp = parseInt(str.substring(i+2, str.length))*10; // for down counting second
           }
         }
+        if (highTemp > 360) highTemp = 360;
+        if (highTemp < 120) highTemp = 120;
+        
         // console.log('sun error: '+ err);
         str = hsinchu.results.Sun[0].sunrise;
         sunriseHour = parseInt(str.substring(0,2))+1;   // Sprinkle one hour later
@@ -126,27 +121,45 @@ function crawlKimono() {
         console.log(sunriseHour+':'+sunriseMinute);
         console.log(sunsetHour+':'+sunsetMinute);
     });
+    setTimeout(crawlKimono, 60*minutes); // 1 hour period; no other state
+}
+
+function checkSchedule() {
+    var d = new Date();
+    var hour = d.getHours();
+    var minute = d.getMinutes();
+    if (((sunriseHour == hour) && (sunriseMinute == minute)) ||
+        ((sunsetHour  == hour) && (sunsetMinute  == minute))) {
+        setTimeout(setCounter_Log, 1);
+    } else setTimeout(checkSchedule, 20000); // 20 seconds cycle
+}
+
+function setCounter_Log() {             // 120~360 Second
+    b.digitalWrite(RelayPin, 1);        // turn on motor
+    b.digitalWrite('USR0', 1);          // turns the LED ON
     
-    setTimeout(crawlKimono, 60*minutes); // 1 hour period
-}
-
-function stateCheckCounter() {
-    if (downCounter > 1) {              // 5~20 minutes
-        b.digitalWrite(RelayPin, 1);    // turn on motor
-        b.digitalWrite('USR0', 1);      // turns the LED ON
-        intervalObject = setInterval(function() { // broadcast.emit: server to "n clients"
-            downCounter--;
-            io.sockets.emit("downCounter", '{"downValue":"'+ downCounter +'"}');
-        }, 999); // one second interval count down; pass downCounter value to client
-        setTimeout(stateDownCounting, 1); // state change
+    if (accRain >= 1) {                 // check raining status
+        accRain -= 1;                   // reduce 1mm each time; it is raining outside
+        downCounter = 0;                // by pass Sprinkle
+        setTimeout(checkSchedule, 1);   // change state
     } else {
-        setTimeout(stateCheckCounter, 1000); // 
+        downCounter = Math.floor((highTemp * (1-accRain))); // set downCounter
+        accRain = 0;
     }
+    
+    intervalObject = setInterval(function() { // broadcast.emit: server to "n clients"
+        downCounter--;
+        io.sockets.emit("downCounter", '{"downValue":"'+ downCounter +'"}');
+    }, 999); // one second interval count down; pass downCounter value to client
+    
+    // writer Log file out
+    
+    setTimeout(downCounting, 1); // state change
 }
 
-function stateDownCounting() {
+function downCounting() {
     if (downCounter > 0) {
-        setTimeout(stateDownCounting, 999);
+        setTimeout(downCounting, 999);
     } else {
         b.digitalWrite(RelayPin, 0);    // turn off motor
         b.digitalWrite('USR0', 0);      // turns the LED OFF
@@ -154,7 +167,7 @@ function stateDownCounting() {
         b.digitalWrite('USR2', 0);
         // console.log('\t\tGrundfos Hot Water Pump is the '+ logCounter +'th turn-off'); 
         clearInterval(intervalObject);
-        setTimeout(stateCheckCounter, 1);// state change
+        setTimeout(checkSchedule, 1);   // state change
     }
 }
 
