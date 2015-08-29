@@ -32,9 +32,9 @@ var sunsetMinute = 0;                   //
 var highTemp = 250;                     // Highest Temperature of the day *10
 // }----------------------------------------------------------------------------
 // Initialization {
-setTimeout(aliveSignal0, 500);          // Initialization for Toggling LED
-setTimeout(crawlKimono, 500);           // Initialization for Kimono network spider
-setTimeout(checkSchedule, 500);         // Initialization for Main State
+setTimeout(checkSchedule, 1);           // Initialization for Main State
+setTimeout(aliveSignal0, 1);            // Initialization for Toggling LED
+setTimeout(crawlKimono, 1);             // Initialization for Kimono network spider
 // }----------------------------------------------------------------------------
 // Initialize the server on port 8168 {
 var server = http.createServer(function (req, res) {
@@ -118,14 +118,15 @@ function crawlKimono() {
         str = hsinchu.results.Sun[0].sunset;
         sunsetHour = parseInt(str.substring(0,2))-1;    // Sprinkle before sunset
         sunsetMinute = parseInt(str.substring(3,5));
+        console.log('Daily default downcounter value: '+ highTemp);
         console.log(sunriseHour+':'+sunriseMinute);
         console.log(sunsetHour+':'+sunsetMinute);
     });
     setTimeout(crawlKimono, 60*minutes); // 1 hour period; no other state
 }
-
+// .............................................................................
 function checkSchedule() {
-    var d = new Date();
+    var d = new Date();                 // get present time
     var hour = d.getHours();
     var minute = d.getMinutes();
     if (((sunriseHour == hour) && (sunriseMinute == minute)) ||
@@ -135,9 +136,6 @@ function checkSchedule() {
 }
 
 function setCounter_Log() {             // 120~360 Second
-    b.digitalWrite(RelayPin, 1);        // turn on motor
-    b.digitalWrite('USR0', 1);          // turns the LED ON
-    
     if (accRain >= 1) {                 // check raining status
         accRain -= 1;                   // reduce 1mm each time; it is raining outside
         downCounter = 0;                // by pass Sprinkle
@@ -145,16 +143,18 @@ function setCounter_Log() {             // 120~360 Second
     } else {
         downCounter = Math.floor((highTemp * (1-accRain))); // set downCounter
         accRain = 0;
+        b.digitalWrite(RelayPin, 1);        // turn on motor
+        b.digitalWrite('USR0', 1);          // turns the LED ON
+    
+        intervalObject = setInterval(function() { // broadcast.emit: server to "n clients"
+            downCounter--;
+            io.sockets.emit("downCounter", '{"downValue":"'+ downCounter +'"}');
+        }, 999); // one second interval count down; pass downCounter value to client
+        
+        // writer Log file out
+        
+        setTimeout(downCounting, 1); // state change
     }
-    
-    intervalObject = setInterval(function() { // broadcast.emit: server to "n clients"
-        downCounter--;
-        io.sockets.emit("downCounter", '{"downValue":"'+ downCounter +'"}');
-    }, 999); // one second interval count down; pass downCounter value to client
-    
-    // writer Log file out
-    
-    setTimeout(downCounting, 1); // state change
 }
 
 function downCounting() {
@@ -170,7 +170,7 @@ function downCounting() {
         setTimeout(checkSchedule, 1);   // state change
     }
 }
-
+// .............................................................................
 function aliveSignal0() {               // Two States only
     b.digitalWrite('USR3', 0);
     setTimeout(aliveSignal1, 800);      // Toggle LED
