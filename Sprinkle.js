@@ -117,7 +117,7 @@ function crawlKimono() {
         str = hsinchu.results.Sun[0].sunset;
         sunsetHour = parseInt(str.substring(0,2))-1;    // Sprinkle before sunset
         sunsetMinute = parseInt(str.substring(3,5));
-        console.log(new Date()+': '+highTemp+' C, '+rainAverage+' mm, '+sunriseHour+':'+sunriseMinute+', '+sunsetHour+':'+sunsetMinute);
+        logIt(new Date()+': '+highTemp+' C, '+rainAverage+' mm, '+sunriseHour+':'+sunriseMinute+', '+sunsetHour+':'+sunsetMinute);
     });
     setTimeout(crawlKimono, 60*minutes); // 1 hour period; no other state
 }
@@ -147,8 +147,8 @@ function setCounter_Log() {             // one-time state; only enter once
     
         setTimeout(downCounting, 1);    // state change
     }
-    var d = new Date();                 // writer Log file out
-    console.log(d.toLocaleTimeString()+': sprinkle '+downCounting+' seconds');
+    var d = new Date();                 // writer Log file 
+    logIt(d.toLocaleTimeString()+': sprinkle '+downCounting+' seconds');
 }
 
 function downCounting() {
@@ -165,10 +165,6 @@ function downCounting() {
     }
 }
 // .............................................................................
-var d = new Date();                 
-var logData = d.toLocaleTimeString()+': this is a test for log\n';
-logIt(logData);
-
 function logIt(data) {                  // writer Log file out
     fs.open('daily.txt', 'a+', function(err, fd) {
         if (err) {
