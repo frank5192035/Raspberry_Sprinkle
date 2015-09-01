@@ -33,6 +33,8 @@ var sunsetMinute = 0;                   //
 var highTemp = 250;                     // Highest Temperature of the day *10
 // }----------------------------------------------------------------------------
 // Initialization {
+// crawlKimono();
+// setCounter_Log();
 setTimeout(checkSchedule, 1);           // Initialization for Main State
 // setTimeout(aliveSignal0, 1);            // Initialization for Toggling LED
 setTimeout(crawlKimono, 1);             // Initialization for Kimono network spider
@@ -117,7 +119,8 @@ function crawlKimono() {
         str = hsinchu.results.Sun[0].sunset;
         sunsetHour = parseInt(str.substring(0,2))-1;    // Sprinkle before sunset
         sunsetMinute = parseInt(str.substring(3,5));
-        logIt(new Date()+': '+highTemp+' C, '+rainAverage+' mm, '+sunriseHour+':'+sunriseMinute+', '+sunsetHour+':'+sunsetMinute);
+        var record = new Date()+': '+highTemp+' C, '+rainAverage+' mm, '+sunriseHour+':'+sunriseMinute+', '+sunsetHour+':'+sunsetMinute+'\n';
+        logIt(record);
     });
     setTimeout(crawlKimono, 60*minutes); // 1 hour period; no other state
 }
@@ -147,8 +150,9 @@ function setCounter_Log() {             // one-time state; only enter once
     
         setTimeout(downCounting, 1);    // state change
     }
-    var d = new Date();                 // writer Log file 
-    logIt(d.toLocaleTimeString()+': sprinkle '+downCounting+' seconds');
+    var d = new Date();                 // writer Log file
+    var record = d.toLocaleTimeString()+': sprinkle '+downCounter+' seconds\n';
+    logIt(record);
 }
 
 function downCounting() {
