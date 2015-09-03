@@ -21,7 +21,7 @@ var b = require('bonescript');
 // b.digitalWrite('USR2', 0);
 // }----------------------------------------------------------------------------
 // Global Variables and Constants {
-const minutes = 60000;                  // Minute
+const hours = 60*60*1000;
 var downCounter = 0;                    // Main Counter of Motor ON
 // var intervalObject;                     // Returns a timeoutObject for possible use with clearTimeout()
 var accRain = 0.0;                      // Raining accumulation <= 14
@@ -94,11 +94,16 @@ function crawlKimono() {
     request("https://www.kimonolabs.com/api/6ucbaoiy?apikey=lcE98jpR1ZSfMv1hY8eB9cTgEUAnhoTn", 
     function(err, response, body) {     // average rain of pass 24 hours
         var hsinchu = JSON.parse(body);
-        rainAverage = (parseFloat(hsinchu.results.Rain[0].mm)+
-            parseFloat(hsinchu.results.Rain[1].mm)+parseFloat(hsinchu.results.Rain[2].mm)+
-            parseFloat(hsinchu.results.Rain[3].mm))*0.3; // 20% higher than average
+        var tt = 0;
+        rainAverage = 0;
+        for (var i=0; i<4; i++) {
+            tt = parseFloat(hsinchu.results.Rain[i].mm);
+            if (isNaN(tt)) tt = 0;
+            rainAverage += tt;
+        }
+        rainAverage *= 0.3;             // 20% higher than average
         if (rainAverage > 14) rainAverage = 14; // maximum setting for rainAverage = 1 week
-        if (rainAverage > accRain) accRain = rainAverage;
+        if (rainAverage > accRain) accRain = rainAverage
     });
     request("https://www.kimonolabs.com/api/78dba3cq?apikey=lcE98jpR1ZSfMv1hY8eB9cTgEUAnhoTn",
     function(err, response, body) {     // Highest Temperature
@@ -122,7 +127,7 @@ function crawlKimono() {
         var record = new Date()+': '+highTemp+' C, '+rainAverage+' mm, '+sunriseHour+':'+sunriseMinute+', '+sunsetHour+':'+sunsetMinute+'\n';
         logIt(record);
     });
-    setTimeout(crawlKimono, 60*minutes); // 1 hour period; no other state
+    setTimeout(crawlKimono, 1*hours); // 1 hour period; no other state
 }
 // .............................................................................
 function checkSchedule() {
@@ -141,7 +146,7 @@ function setCounter_Log() {             // one-time state; only enter once
             accRain -= 1;               // reduce 1mm each time
         }
         downCounter = 0;                // by pass Sprinkle
-        setTimeout(checkSchedule, 1);   // change state
+        setTimeout(checkSchedule, 9*hours); // avoid state loop
     } else {
         downCounter = Math.floor((highTemp * (1-accRain))); // set downCounter
         accRain = 0;
