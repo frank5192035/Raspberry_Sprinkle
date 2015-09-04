@@ -101,7 +101,7 @@ function crawlKimono() {
             if (isNaN(tt)) tt = 0;
             rainAverage += tt;
         }
-        rainAverage *= 0.3;             // 20% higher than average
+        rainAverage = Math.round(rainAverage*30) / 100; // 20% higher than average
         if (rainAverage > 14) rainAverage = 14; // maximum setting for rainAverage = 1 week
         if (rainAverage > accRain) accRain = rainAverage
     });
@@ -146,7 +146,7 @@ function setCounter_Log() {             // one-time state; only enter once
             accRain -= 1;               // reduce 1mm each time
         }
         downCounter = 0;                // by pass Sprinkle
-        setTimeout(checkSchedule, 9*hours); // avoid state loop
+        setTimeout(checkSchedule, 1*hours); // avoid state loop
     } else {
         downCounter = Math.floor((highTemp * (1-accRain))); // set downCounter
         accRain = 0;
