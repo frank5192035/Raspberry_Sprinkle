@@ -2,28 +2,19 @@
 //      by Frank Hsiung
 
 // Loading modules {
-var http = require('http');
-var fs = require('fs');
+// var http = require('http');
 // var path = require('path');
-var request = require("/usr/local/lib/node_modules/request");
-
+var fs = require('fs');
+var request = require('/usr/local/lib/node_modules/request');
+var gpio = require('/usr/local/lib/node_modules/onoff').Gpio;
 // }----------------------------------------------------------------------------
 // set Pins {
-// var RelayPin = "P9_12";                 // default Relay Pin
-// b.pinMode('USR0', b.OUTPUT);            // USR0, USR1 are on/off the same as Relay
-// b.pinMode('USR1', b.OUTPUT);
-// b.pinMode('USR2', b.OUTPUT);            // USR2 alive toggle with USR3
-// b.pinMode('USR3', b.OUTPUT);
-// b.pinMode(RelayPin, b.OUTPUT);          // Relay Pin for Turn ON/OFF Motor
-// b.digitalWrite(RelayPin, 0);            // turn off motor
-// b.digitalWrite('USR0', 0);              // turns the LED OFF
-// b.digitalWrite('USR1', 0);
-// b.digitalWrite('USR2', 0);
+var RelayPin = new gpio(18, 'out');     // default Relay Pin
+RelayPin.writeSync(0);                  // turn off motor
 // }----------------------------------------------------------------------------
 // Global Variables and Constants {
 const hours = 60*60*1000;
 var downCounter = 0;                    // Main Counter of Motor ON
-// var intervalObject;                     // Returns a timeoutObject for possible use with clearTimeout()
 var accRain = 0.0;                      // Raining accumulation <= 14
 var rainAverage;                        // average of 4 rain station
 var sunriseHour = 6;                    // for comparison of sunrise time
@@ -33,61 +24,9 @@ var sunsetMinute = 0;                   //
 var highTemp = 250;                     // Highest Temperature of the day *10
 // }----------------------------------------------------------------------------
 // Initialization {
-// crawlKimono();
-// setCounter_Log();
 setTimeout(checkSchedule, 1);           // Initialization for Main State
-// setTimeout(aliveSignal0, 1);            // Initialization for Toggling LED
 setTimeout(crawlKimono, 1);             // Initialization for Kimono network spider
 // }----------------------------------------------------------------------------
-// Initialize the server on port 8168 {
-// var server = http.createServer(function (req, res) {
-//     var file = '/var/lib/cloud9/BeagleBone_Motor'+((req.url=='/')?'/Grundfos.html':req.url); // requesting files
-//     var contentType = 'text/html';
-//             // Uncoment if you want to add css to your web page
-//             // var path = require('path');
-//             // var fileExtension = path.extname(file);
-//             // if(fileExtension == '.css') {
-//             //     contentType = 'text/css';
-//             // }
-//     fs.exists(file, function(exists) {
-//         if(exists){
-//             fs.readFile(file, function(error, content) {
-//                 if(!error) {
-//                     res.writeHead(200,{'content-type':contentType}); // Page found, write content
-//                     res.end(content);
-//                 }
-//             })
-//         }
-//         else {
-//             res.writeHead(404);         // Page not found
-//             res.end('Page not found');
-//         }
-//     })
-// }).listen(8168,'192.168.0.178');
-// }----------------------------------------------------------------------------
-// socket.io Communication {
-// var io = require('socket.io').listen(server); // Loading socket io module
-
-// io.on('connection', function (socket) { // When communication is established
-//     socket.on('pumpON', function(data) {// Clent-size signal for reset downCounter to shower.value
-//         var shower = JSON.parse(data);
-//         if (shower.on == 1) {
-//             downCounter = shower.value; // set or reset downCounter to shower.value
-//             logCounter++;
-//             console.log(new Date +': Grundfos '+ logCounter +'th turn-on for '+ shower.value +' seconds'); 
-//             if (1 == logCounter%2) {    // Two LED for Key Press Toggle
-//                 b.digitalWrite('USR1', 1);
-//                 b.digitalWrite('USR2', 0);
-//             } else {
-//                 b.digitalWrite('USR1', 0);
-//                 b.digitalWrite('USR2', 1);
-//             }
-//         } else if (shower.on == 0) downCounter = 1;
-        
-//     }); // pumpON string from Grundfos.html; shower.on turn on Motor
-// });
-
-// server.listen(console.log('Grundfos Server is Running: http://' + getIPAddress() + ':8168'));
 // }----------------------------------------------------------------------------
 // State Machine and Function Call {
 function crawlKimono() {
@@ -150,9 +89,7 @@ function setCounter_Log() {             // one-time state; only enter once
     } else {
         downCounter = Math.floor((highTemp * (1-accRain))); // set downCounter
         accRain = 0;
-        // b.digitalWrite(RelayPin, 1);    // turn on motor
-        // b.digitalWrite('USR0', 1);      // turns the LED ON
-    
+        RelayPin.writeSync(1);          // turn on motor
         setTimeout(downCounting, 1);    // state change
     }
     var d = new Date();                 // writer Log file
@@ -162,15 +99,11 @@ function setCounter_Log() {             // one-time state; only enter once
 
 function downCounting() {
     if (downCounter > 0) {
-        setTimeout(downCounting, 999);
+        setTimeout(downCounting, 1000);
     } else {
-        // b.digitalWrite(RelayPin, 0);    // turn off motor
-        // b.digitalWrite('USR0', 0);      // turns the LED OFF
-        // b.digitalWrite('USR1', 0);
-        // b.digitalWrite('USR2', 0);
+        RelayPin.writeSync(0);          // turn off motor
         // console.log('\t\tGrundfos Hot Water Pump is the '+ logCounter +'th turn-off'); 
-        // clearInterval(intervalObject);
-        setTimeout(checkSchedule, 1);   // state change
+        setTimeout(checkSchedule, 1);   // state change; sprinkle finished
     }
 }
 // .............................................................................
@@ -195,13 +128,3 @@ function logIt(data) {                  // writer Log file out
     });
 }
 // .............................................................................
-// function aliveSignal0() {               // Two States only
-//     b.digitalWrite('USR3', 0);
-//     setTimeout(aliveSignal1, 800);      // Toggle LED
-// }
-
-// function aliveSignal1() {
-//     b.digitalWrite('USR3', 1);
-//     setTimeout(aliveSignal0, 200);      // Toggle LED
-// }
-// }
