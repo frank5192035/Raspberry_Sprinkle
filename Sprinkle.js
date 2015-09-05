@@ -4,9 +4,9 @@
 // Loading modules {
 var http = require('http');
 var fs = require('fs');
-var path = require('path');
-var request = require("request");
-var b = require('bonescript');
+// var path = require('path');
+var request = require("/usr/local/lib/node_modules/request");
+
 // }----------------------------------------------------------------------------
 // set Pins {
 // var RelayPin = "P9_12";                 // default Relay Pin
