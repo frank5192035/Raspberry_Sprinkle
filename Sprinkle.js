@@ -98,7 +98,7 @@ function setCounter_Log() {             // one-time state; only enter once
 }
 
 function downCounting() {
-    if (downCounter > 0) {
+    if (downCounter-- > 0) {
         setTimeout(downCounting, 1000);
     } else {
         RelayPin.writeSync(0);          // turn off motor
