@@ -10,7 +10,7 @@ var gpio = require('/usr/local/lib/node_modules/onoff').Gpio;
 // }----------------------------------------------------------------------------
 // set Pins {
 var RelayPin = new gpio(18, 'out');     // default Relay Pin
-RelayPin.writeSync(0);                  // turn off motor
+RelayPin.writeSync(1);                  // turn off motor: active low
 // }----------------------------------------------------------------------------
 // Global Variables and Constants {
 const hours = 60*60*1000;
@@ -89,7 +89,7 @@ function setCounter_Log() {             // one-time state; only enter once
     } else {
         downCounter = Math.floor((highTemp * (1-accRain))); // set downCounter
         accRain = 0;
-        RelayPin.writeSync(1);          // turn on motor
+        RelayPin.writeSync(0);          // turn on motor
         setTimeout(downCounting, 1);    // state change
     }
     var d = new Date();                 // writer Log file
@@ -101,7 +101,7 @@ function downCounting() {
     if (downCounter-- > 0) {
         setTimeout(downCounting, 1000);
     } else {
-        RelayPin.writeSync(0);          // turn off motor
+        RelayPin.writeSync(1);          // turn off motor
         // console.log('\t\tGrundfos Hot Water Pump is the '+ logCounter +'th turn-off'); 
         setTimeout(checkSchedule, 1);   // state change; sprinkle finished
     }
