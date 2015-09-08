@@ -97,7 +97,7 @@ function setCounter_Log() {             // one-time state; only enter once
     logIt(record);
 }
 
-function downCounting() 
+function downCounting() {
     if (downCounter-- > 0) {
         setTimeout(downCounting, 1000);
     } else {
