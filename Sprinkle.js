@@ -93,11 +93,11 @@ function setCounter_Log() {             // one-time state; only enter once
         setTimeout(downCounting, 1);    // state change
     }
     var d = new Date();                 // writer Log file
-    var record = d.toLocaleTimeString()+': sprinkle '+downCounter+' seconds\n';
+    var record = d.toLocaleTimeString()+': sprinkle '+downCounter+' second(accRain='+accRain+'）\n';
     logIt(record);
 }
 
-function downCounting() {
+function downCounting() 
     if (downCounter-- > 0) {
         setTimeout(downCounting, 1000);
     } else {
