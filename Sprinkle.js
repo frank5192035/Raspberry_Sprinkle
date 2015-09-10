@@ -85,7 +85,7 @@ function setCounter_Log() {             // one-time state; only enter once
             accRain -= 1;               // reduce 1mm each time
         }
         downCounter = 0;                // by pass Sprinkle
-        setTimeout(checkSchedule, 1*hours); // avoid state loop
+        setTimeout(checkSchedule, 8*hours); // avoid state loop
     } else {
         downCounter = Math.floor((highTemp * (1-accRain))); // set downCounter
         accRain = 0;
@@ -103,7 +103,7 @@ function downCounting() {
     } else {
         RelayPin.writeSync(1);          // turn off motor
         // console.log('\t\tGrundfos Hot Water Pump is the '+ logCounter +'th turn-off'); 
-        setTimeout(checkSchedule, 1);   // state change; sprinkle finished
+        setTimeout(checkSchedule, 8*hours);   // state change; sprinkle finished
     }
 }
 // .............................................................................
