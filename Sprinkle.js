@@ -32,39 +32,43 @@ setTimeout(crawlKimono, 1);             // Initialization for Kimono network spi
 function crawlKimono() {
     request("https://www.kimonolabs.com/api/6ucbaoiy?apikey=lcE98jpR1ZSfMv1hY8eB9cTgEUAnhoTn", 
     function(err, response, body) {     // average rain of pass 24 hours
-        var hsinchu = JSON.parse(body);
-        var tt = 0;
-        rainAverage = 0;
-        for (var i=0; i<4; i++) {
-            tt = parseFloat(hsinchu.results.Rain[i].mm);
-            if (isNaN(tt)) tt = 0;
-            rainAverage += tt;
+        if (!err && response.statusCode == 200) {
+            var hsinchu = JSON.parse(body);
+            var tt = 0;
+            rainAverage = 0;
+            for (var i=0; i<4; i++) {
+                tt = parseFloat(hsinchu.results.Rain[i].mm);
+                if (isNaN(tt)) tt = 0;
+                rainAverage += tt;
+            }
+            rainAverage = Math.round(rainAverage*30) / 100; // 20% higher than average
+            if (rainAverage > 14) rainAverage = 14; // maximum setting for rainAverage = 1 week
+            if (rainAverage > accRain) accRain = rainAverage;
         }
-        rainAverage = Math.round(rainAverage*30) / 100; // 20% higher than average
-        if (rainAverage > 14) rainAverage = 14; // maximum setting for rainAverage = 1 week
-        if (rainAverage > accRain) accRain = rainAverage
     });
     request("https://www.kimonolabs.com/api/78dba3cq?apikey=lcE98jpR1ZSfMv1hY8eB9cTgEUAnhoTn",
     function(err, response, body) {     // Highest Temperature
-        var hsinchu = JSON.parse(body);
-        var str = hsinchu.results.Sun[0].temp;
-        for (var i=2; i < str.length; i++) { 
-          if (str[i] == "~") {
-              highTemp = parseInt(str.substring(i+2, str.length))*10; // for down counting second
-          }
+        if (!err && response.statusCode == 200) {
+            var hsinchu = JSON.parse(body);
+            var str = hsinchu.results.Sun[0].temp;
+            for (var i=2; i < str.length; i++) { 
+              if (str[i] == "~") {
+                  highTemp = parseInt(str.substring(i+2, str.length), 10)*10; // for down counting second
+              }
+            }
+            if (highTemp > 360) highTemp = 360; // 120~360 Second
+            if (highTemp < 120) highTemp = 120;
+            
+            // console.log('sun error: '+ err);
+            str = hsinchu.results.Sun[0].sunrise;
+            sunriseHour = parseInt(str.substring(0,2), 10)+1;   // Sprinkle one hour later
+            sunriseMinute = parseInt(str.substring(3,5), 10); 
+            str = hsinchu.results.Sun[0].sunset;
+            sunsetHour = parseInt(str.substring(0,2), 10)-1;    // Sprinkle before sunset
+            sunsetMinute = parseInt(str.substring(3,5), 10);
+            var record = new Date()+': '+highTemp+' C, '+rainAverage+' mm, '+sunriseHour+':'+sunriseMinute+', '+sunsetHour+':'+sunsetMinute+'\n';
+            logIt(record);
         }
-        if (highTemp > 360) highTemp = 360; // 120~360 Second
-        if (highTemp < 120) highTemp = 120;
-        
-        // console.log('sun error: '+ err);
-        str = hsinchu.results.Sun[0].sunrise;
-        sunriseHour = parseInt(str.substring(0,2))+1;   // Sprinkle one hour later
-        sunriseMinute = parseInt(str.substring(3,5)); 
-        str = hsinchu.results.Sun[0].sunset;
-        sunsetHour = parseInt(str.substring(0,2))-1;    // Sprinkle before sunset
-        sunsetMinute = parseInt(str.substring(3,5));
-        var record = new Date()+': '+highTemp+' C, '+rainAverage+' mm, '+sunriseHour+':'+sunriseMinute+', '+sunsetHour+':'+sunsetMinute+'\n';
-        logIt(record);
     });
     setTimeout(crawlKimono, 1*hours); // 1 hour period; no other state
 }
