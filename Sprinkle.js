@@ -48,6 +48,7 @@ function crawlKimono() {
     });
     request("https://www.kimonolabs.com/api/78dba3cq?apikey=lcE98jpR1ZSfMv1hY8eB9cTgEUAnhoTn",
     function(err, response, body) {     // Highest Temperature
+        var record;
         if (!err && response.statusCode == 200) {
             var hsinchu = JSON.parse(body);
             var str = hsinchu.results.Sun[0].temp;
@@ -59,14 +60,16 @@ function crawlKimono() {
             if (highTemp > 360) highTemp = 360; // 120~360 Second
             if (highTemp < 120) highTemp = 120;
             
-            // console.log('sun error: '+ err);
             str = hsinchu.results.Sun[0].sunrise;
             sunriseHour = parseInt(str.substring(0,2), 10)+1;   // Sprinkle one hour later
             sunriseMinute = parseInt(str.substring(3,5), 10); 
             str = hsinchu.results.Sun[0].sunset;
             sunsetHour = parseInt(str.substring(0,2), 10)-1;    // Sprinkle before sunset
             sunsetMinute = parseInt(str.substring(3,5), 10);
-            var record = new Date()+': '+highTemp+' C, '+rainAverage+' mm, '+sunriseHour+':'+sunriseMinute+', '+sunsetHour+':'+sunsetMinute+'\n';
+            record = new Date()+': '+highTemp+' C, '+rainAverage+' mm, '+sunriseHour+':'+sunriseMinute+', '+sunsetHour+':'+sunsetMinute+'\n';
+            logIt(record);
+        } else {
+            record = new Date()+': network error, bypass this hour';
             logIt(record);
         }
     });
@@ -106,7 +109,6 @@ function downCounting() {
         setTimeout(downCounting, 1000);
     } else {
         RelayPin.writeSync(1);          // turn off motor
-        // console.log('\t\tGrundfos Hot Water Pump is the '+ logCounter +'th turn-off'); 
         setTimeout(checkSchedule, 1*hours);   // state change; sprinkle finished
     }
 }
@@ -116,18 +118,15 @@ function logIt(data) {                  // writer Log file out
         if (err) {
             return console.error(err);
         }   
-        // console.log("File opened successfully!"); 
         fs.appendFile('daily.txt', data,  function(err) {
            if (err) {
                 return console.error(err);
            }
-        //   console.log("Data written successfully!");
         });
         fs.close(fd, function(err){
             if (err) {
                 console.log(err);
             } 
-            // console.log("File closed successfully.");
         });
     });
 }
