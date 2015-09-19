@@ -69,7 +69,7 @@ function crawlKimono() {
             record = new Date()+': '+highTemp+' C, '+rainAverage+' mm, '+sunriseHour+':'+sunriseMinute+', '+sunsetHour+':'+sunsetMinute+'\n';
             logIt(record);
         } else {
-            record = new Date()+': network error, bypass this hour';
+            record = new Date()+': network error, bypass this hour\n';
             logIt(record);
         }
     });
