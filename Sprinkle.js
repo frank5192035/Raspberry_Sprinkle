@@ -100,7 +100,8 @@ function setCounter_Log() {             // one-time state; only enter once
         setTimeout(downCounting, 1);    // state change
     }
     var d = new Date();                 // writer Log file
-    var record = d.toLocaleTimeString()+': sprinkle '+downCounter+' second(accRain='+accRain+'）\n';
+    var record = d+': sprinkle '+downCounter+' second(accRain='+accRain+'）\n';
+    // var record = d.toLocaleTimeString()+': sprinkle '+downCounter+' second(accRain='+accRain+'）\n';
     logIt(record);
 }
 
