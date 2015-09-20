@@ -1,5 +1,5 @@
 //      Main Program for Sprinkle
-//      by Frank Hsiung
+//      by Frank Hsiung         Sep 20, 2015
 
 // Loading modules {
 // var http = require('http');
@@ -67,10 +67,10 @@ function crawlKimono() {
             sunsetHour = parseInt(str.substring(0,2), 10)-1;    // Sprinkle before sunset
             sunsetMinute = parseInt(str.substring(3,5), 10);
             record = new Date()+': '+highTemp+' C, '+rainAverage+' mm, '+sunriseHour+':'+sunriseMinute+', '+sunsetHour+':'+sunsetMinute+'\n';
-            logIt(record);
+            // logIt(record);
         } else {
             record = new Date()+': network error, bypass this hour\n';
-            logIt(record);
+            // logIt(record);
         }
     });
     setTimeout(crawlKimono, 1*hours); // 1 hour period; no other state
