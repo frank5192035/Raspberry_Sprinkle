@@ -90,10 +90,7 @@ function checkSchedule() {
 
 function setCounter_Log() {             // one-time state; only enter once
     if (accRain >= 1) {                 // check raining status
-        if (rainAverage < 1) {          // no more raining
-            accRain -= 1;               // reduce 1mm each time
-        }
-        downCounter = 0;                // by pass Sprinkle
+        accRain -= 1;                   // reduce 1mm each time
         setTimeout(checkSchedule, 1*hours); // avoid state loop
     } else {
         downCounter = Math.floor((highTemp * (1-accRain))); // set downCounter
