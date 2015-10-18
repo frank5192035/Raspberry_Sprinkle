@@ -66,10 +66,10 @@ function crawlKimono() {
                 sunsetHour = parseInt(str.substring(0,2), 10)-1;    // Sprinkle before sunset
                 sunsetMinute = parseInt(str.substring(3,5), 10);
                 var record = new Date()+': '+highTemp+' C, '+rainAverage+' mm, '+sunriseHour+':'+sunriseMinute+', '+sunsetHour+':'+sunsetMinute+'\n';
-                logIt(record);
+                console.log(record);
             } else {
                 record = new Date()+': network error, bypass this hour\n';
-                logIt(record);
+                console.log(record);
             }
         });
     }).on('error', function(e) {
@@ -86,6 +86,7 @@ function checkSchedule() {
         ((sunsetHour  == hour) && (sunsetMinute  == minute))) {
         setTimeout(setCounter_Log, 1);
     } else setTimeout(checkSchedule, 20000); // 20 seconds cycle
+    console.log(d+'\n');
 }
 
 function setCounter_Log() {             // one-time state; only enter once
@@ -101,7 +102,7 @@ function setCounter_Log() {             // one-time state; only enter once
     var d = new Date();                 // writer Log file
     var record = d+': sprinkle '+downCounter+' second(accRain='+accRain+'）\n';
     // var record = d.toLocaleTimeString()+': sprinkle '+downCounter+' second(accRain='+accRain+'）\n';
-    logIt(record);
+    console.log(record);
 }
 
 function downCounting() {
@@ -113,21 +114,21 @@ function downCounting() {
     }
 }
 // .............................................................................
-function logIt(data) {                  // writer Log file out
-    fs.open('daily.txt', 'a+', function(err, fd) {
-        if (err) {
-            return console.error(err);
-        }   
-        fs.appendFile('daily.txt', data,  function(err) {
-           if (err) {
-                return console.error(err);
-           }
-        });
-        fs.close(fd, function(err){
-            if (err) {
-                console.log(err);
-            } 
-        });
-    });
-}
+// function logIt(data) {                  // writer Log file out
+//     fs.open('daily.txt', 'a+', function(err, fd) {
+//         if (err) {
+//             return console.error(err);
+//         }   
+//         fs.appendFile('daily.txt', data,  function(err) {
+//           if (err) {
+//                 return console.error(err);
+//           }
+//         });
+//         fs.close(fd, function(err){
+//             if (err) {
+//                 console.log(err);
+//             } 
+//         });
+//     });
+// }
 // }............................................................................
