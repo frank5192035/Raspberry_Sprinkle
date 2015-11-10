@@ -12,6 +12,15 @@ var b = require('bonescript');
 var RelayPin = 'P9_12';                 // default Relay Pin
 b.pinMode(RelayPin, b.OUTPUT);          // Relay Pin for Turn ON/OFF Motor
 b.digitalWrite(RelayPin, 1);            // turn off motor; for low active relay
+
+b.pinMode('USR0', b.OUTPUT);            // USR0, USR1 are on/off the same as Relay
+b.pinMode('USR1', b.OUTPUT);
+b.pinMode('USR2', b.OUTPUT);            // USR2 alive toggle with USR3
+b.pinMode('USR3', b.OUTPUT);
+b.digitalWrite('USR0', 0);              // turns the LED OFF
+b.digitalWrite('USR1', 0);
+b.digitalWrite('USR2', 0);
+
 // }----------------------------------------------------------------------------
 // Global Variables and Constants {
 const hours = 60*60*1000;
@@ -27,6 +36,7 @@ var highTemp = 250;                     // Highest Temperature of the day *10
 // Initialization {
 setTimeout(checkSchedule, 1);           // Initialization for Main State
 setTimeout(crawlKimono, 1);             // Initialization for Kimono network spider
+setTimeout(aliveSignal0, 1);            // Initialization for Toggling LED
 // }----------------------------------------------------------------------------
 // State Machine and Function Call {
 function crawlKimono() {
@@ -136,3 +146,12 @@ function logIt(data) {                  // writer Log file out
     });
 }
 // }............................................................................
+function aliveSignal0() {               // Two States only
+    b.digitalWrite('USR3', 0);
+    setTimeout(aliveSignal1, 800);      // Toggle LED
+}
+
+function aliveSignal1() {
+    b.digitalWrite('USR3', 1);
+    setTimeout(aliveSignal0, 200);      // Toggle LED
+}
