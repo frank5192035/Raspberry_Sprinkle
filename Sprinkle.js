@@ -123,6 +123,7 @@ function downCounting() {
     if (downCounter-- > 0) {
         setTimeout(downCounting, 1000);
     } else {
+        downCounter = 0;                // else downCounter=-1 will remain its value
         b.digitalWrite(RelayPin, 1);    // turn off motor
         setTimeout(checkSchedule, 1*hours); // state change; sprinkle finished
     }
