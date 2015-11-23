@@ -2,7 +2,7 @@
 
 n=$( ps ax | grep Sprinkle | wc -l)
 
-if test $n -le 1; then
+if test $n -le 2; then
     node /var/lib/cloud9/Raspberry_Sprinkle/Sprinkle.js &
     echo 'crontab for invoking Sprinkle.js'
 fi
