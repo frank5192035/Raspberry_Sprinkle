@@ -1,8 +1,10 @@
 #!/bin/sh
 
-n=$( ps ax | grep Sprinkle | wc -l)
+n=$(ps ax | grep Sprinkle | wc -l)
+echo $n
 
-if test $n -le 2; then
+# still do not know why $n=3 ???
+if test $n -le 3; then
     node /var/lib/cloud9/Raspberry_Sprinkle/Sprinkle.js &
     echo 'crontab for invoking Sprinkle.js'
 fi
