@@ -149,7 +149,7 @@ function logIt(data) {                  // writer Log file out
 // }............................................................................
 function aliveSignal0() {               // Two States only
     b.digitalWrite('USR3', 0);
-    setTimeout(aliveSignal1, 800);      // Toggle LED
+    setTimeout(aliveSignal1, 1800);     // Toggle LED
 }
 
 function aliveSignal1() {
