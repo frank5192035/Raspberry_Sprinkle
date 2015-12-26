@@ -46,7 +46,7 @@ function crawlKimono() {
                 var hsinchu = JSON.parse(body);
                 var tt = 0;
                 rainAverage = 0;
-                for (var i=0; i<4; i++) {
+                for (var i=0; i<2; i++) {
                     tt = parseFloat(hsinchu.results.Rain[i].mm);
                     if (isNaN(tt)) tt = 0;
                     rainAverage += tt;
