@@ -108,7 +108,7 @@ function CrawCWB() {
     });
 
     // 15 minutes period; no other state
-    setTimeout(CrawCWB, hours/4); 
+    setTimeout(CrawCWB, 2*60*1000); 
 }
 // }
 // .............................................................................
