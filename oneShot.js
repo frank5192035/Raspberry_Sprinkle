@@ -18,7 +18,8 @@ b.digitalWrite('USR1', 0);
 b.digitalWrite('USR2', 0);
 // }----------------------------------------------------------------------------
 
-var downCounter = 360;                    // Main Counter of Motor ON
+var downCounter = 360;                  // Main Counter of Motor ON
+b.digitalWrite(RelayPin, 0);            // turn on motor; for low active relay
 
 function downCounting() {
     if (downCounter-- > 0) {
