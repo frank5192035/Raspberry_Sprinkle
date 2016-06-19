@@ -6,11 +6,10 @@
 //                              Jun 12, 2016 端午假期
 
 // Loading modules {
+var b = require('bonescript');
 var fs = require('fs');
 var request = require('request');
 var cheerio = require("cheerio");
-var b = require('bonescript');
-// var http = require('http');
 // }----------------------------------------------------------------------------
 // set Pins {
 var RelayPin = 'P9_12';                 // default Relay Pin
@@ -24,7 +23,6 @@ b.pinMode('USR3', b.OUTPUT);
 b.digitalWrite('USR0', 0);              // turns the LED OFF
 b.digitalWrite('USR1', 0);
 b.digitalWrite('USR2', 0);
-
 // }----------------------------------------------------------------------------
 // Global Variables and Constants {
 const hours = 60*60*1000;
@@ -32,20 +30,20 @@ var downCounter = 0;                    // Main Counter of Motor ON
 var accRain = 0.0;                      // Raining accumulation <= 14
 var rainAverage;                        // average of 4 rain station
 var sunriseHour = 6;                    // for comparison of sunrise time
-var sunriseMinute = 0;                  //
+var sunriseMinute = 0;                  // 日出後一小時灑水
 var sunsetHour = 18;                    // for comparison of sunset time
-var sunsetMinute = 0;                   //
+var sunsetMinute = 0;                   // 日落前一小時灑水
 var highTemp = 250;                     // Highest Temperature of the day *10
 // }----------------------------------------------------------------------------
 // Initialization {
-// setTimeout(checkSchedule, 1);           // Initialization for Main State
-setTimeout(CrawCWB, 1);                 // Initialization for Kimono network spider
-setTimeout(aliveSignal0, 1);            // Initialization for Toggling LED
+setTimeout(checkSchedule, 1);           // 20秒檢查一次灑水時間
+setTimeout(CrawCWB, 1);                 // 15分鐘爬一次中央氣象局網頁
+setTimeout(aliveSignal0, 1);            // Initialization for Toggling LED; 主機是否當機
 // }----------------------------------------------------------------------------
 // State Machine and Function Call {
 function CrawCWB() {
     var record;
-    // 雨量
+    // 新竹市雨量
     var uri = "http://www.cwb.gov.tw/V7/observe/rainfall/Rain_Hr/4.htm";
     request({url: uri, method: "GET"}, function(error, response, body) {
         if (error || !body) {
@@ -70,8 +68,8 @@ function CrawCWB() {
         }
     });
 
-    // 日出日落
-    var uri = "http://www.cwb.gov.tw/V7/forecast/taiwan/Hsinchu_City.htm";
+    // 新竹市日出日落
+    uri = "http://www.cwb.gov.tw/V7/forecast/taiwan/Hsinchu_City.htm";
     request({url: uri, method: "GET"}, function(error, response, body) {
         if (error || !body) {
             console.log(error);
@@ -108,6 +106,9 @@ function CrawCWB() {
             logIt(record);
         }
     });
+
+    // 15 minutes period; no other state
+    setTimeout(CrawCWB, hours/4); 
 }
 // }
 // .............................................................................
