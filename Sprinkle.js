@@ -99,10 +99,12 @@ function CrawCWB() {
             tt = tt[1].split('\n\t');   // 切開成Array
             sunriseHour = parseInt(tt[0].substring(0,2), 10);
             sunriseMinute = parseInt(tt[0].substring(3,5), 10);
-            sunsetHour = parseInt(tt[1].substring(0,2), 10);
+            sunsetHour = parseInt(tt[1].substring(0,2), 10); 
             sunsetMinute = parseInt(tt[1].substring(3,5), 10);
         // console.log(sunriseHour, sunriseMinute, sunsetHour, sunsetMinute);
             record = new Date()+': '+highTemp+' C, '+rainAverage+' mm, '+sunriseHour+':'+sunriseMinute+', '+sunsetHour+':'+sunsetMinute+'\n';
+            sunriseHour += 1;       // 日出後一小時灑水
+            sunsetHour -= 1;        // 日落前一小時灑水
             logIt(record);
         }
     });
